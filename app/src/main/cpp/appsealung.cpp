@@ -130,14 +130,12 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     void *remove = DobbySymbolResolver(NULL, "remove");
     void *fopen = DobbySymbolResolver(NULL, "fopen");
     void *syscall_ptr = DobbySymbolResolver(NULL, "syscall");
-    void *linux_eabi = DobbySymbolResolver(NULL, "linux_eabi_syscall");
 
     attempt_hook("alarm", alarm, (void *) alarm_hook, (void**) &orig_alarm);
     attempt_hook("kill", kill, (void *) kill_hook, (void**) &orig_kill);
     attempt_hook("exit", exit, (void *) exit_hook, (void**) &orig_exit);
     attempt_hook("remove", remove, (void *) remove_hook, (void**) &orig_remove);
     attempt_hook("fopen", fopen, (void *) fopen_hook, (void**) &orig_fopen);
-    attempt_hook("linux_eabi_syscall", linux_eabi, (void*) syscall_hook, (void**)&orig_syscall);
     attempt_hook("syscall", syscall_ptr, (void *) syscall_hook, (void**) &orig_syscall);
 
     return JNI_VERSION_1_6;
