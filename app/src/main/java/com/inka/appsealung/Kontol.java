@@ -50,21 +50,6 @@ public class Kontol implements IXposedHookLoadPackage {
             XposedBridge.log(TAG +": " + param.packageName + " doesn't seem to have AppSealing, skipped.");
             return;
         }
-
-        // Patch out telemetry
-        patchMethod(param, "com.inka.appsealing.AwsSqsSender", m -> "send".equals(m.getName()), () -> true);
-        // Patch out kill
-        patchMethod(param, "com.inka.appsealing.AppSealingAlertDialog", m -> "killMyProcess".equals(m.getName()), () -> null);
-        patchMethod(param, "com.inka.appsealing.AppSealingAlertDialog", m -> "showAlertDialog".equals(m.getName()), () -> null);
-        // Load patch library
-        XposedHelpers.findAndHookMethod("com.inka.appsealing.AppSealingApplication", param.classLoader, "attachBaseContext", Context.class, new XC_MethodHook() {
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                XposedBridge.log(TAG + ": Loading libpeal");
-                System.loadLibrary("appsealung");
-                XposedBridge.log(TAG + ": Loaded libpeal");
-            }
-        });
     }
 
 }
