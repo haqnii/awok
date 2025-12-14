@@ -1,0 +1,43 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Write key
+      run: |
+        echo KEYSTORE_PASSWORD=${{ secrets.KONTOL }} > signing.properties
+        echo KEYSTORE_ALIAS=my-app-key >> signing.properties
+        echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.JARAN }}' >> signing.properties
+        echo KEYSTORE_FILE=../key.jks >> signing.properties
+        echo ${{ secrets.KEYSTORE }} | base64 --decode > key.jks
+
+    - name: Build Release
+      run: ./gradlew assembleRelease
+
+    - run: |
+        cd app/build/outputs/apk/release/
+        mv app-release.apk jembud-${{ github.ref_name }}.apk
+        gh release create --prerelease ${{ github.ref_name }} jembud-${{ github.ref_name }}.apk
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
